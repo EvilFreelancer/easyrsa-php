@@ -8,8 +8,6 @@
 
 # EasyRSA wrapper for PHP
 
-Yet another PSR HTTP messages client, with easyrsa-php name, jep.
-
     composer require evilfreelancer/easyrsa-php
 
 ## How to use
