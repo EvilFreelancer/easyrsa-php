@@ -1,0 +1,26 @@
+{
+  "name": "evilfreelancer/easyrsa-php",
+  "type": "library",
+  "description": "Wrapper on PHP for EasyRSA by OpenVPN team",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "EasyRSA\\": "./src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Paul Rock",
+      "email": "paul@drteam.rocks",
+      "homepage": "http://drteam.rocks/",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^7.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^6.0",
+    "vlucas/phpdotenv": "^2.5"
+  }
+}
