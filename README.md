@@ -28,7 +28,6 @@ use \EasyRSA\Downloader;
 $config =
     (new Config())
         ->setFolder('./easy-rsa')
-        ->setCertsFolder('.')
         ->setArchive('./easy-rsa.tar.gz');
 
 $dnl = new Downloader($config);
@@ -54,6 +53,7 @@ use \EasyRSA\Wrapper;
 $config =
     (new Config())
         ->setFolder('./easy-rsa')
+        ->setCertsFolder('./easy-rsa-certs')
         ->setArchive('./easy-rsa.tar.gz');
 
 $wrp = new Wrapper($config);
@@ -65,7 +65,7 @@ $wrp->build_client_full('client1', true);
 $wrp->build_client_full('client2', true);
 ```
 
-Result of this script will be in `pki` folder.
+Result of this script will be in `easy-rsa-certs` folder.
 
 ## List of all `Wrapper` methods
 

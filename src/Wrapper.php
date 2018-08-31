@@ -31,6 +31,10 @@ class Wrapper
     {
         $this->_certs_folder = realpath($config->getCertsFolder());
         putenv("EASYRSA_PKI={$this->_certs_folder}");
+        if (@mkdir($this->_certs_folder, 0755, true) || is_dir($this->_certs_folder)) {
+            error_log("Folder '{$this->_certs_folder}' created");
+        }
+
         $this->_scripts_folder = realpath($config->getFolder()) . '/easyrsa3';
         $this->_import_req = $this->_certs_folder . '/import.req';
     }
