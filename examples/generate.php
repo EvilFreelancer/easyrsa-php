@@ -12,6 +12,7 @@ use \EasyRSA\Wrapper;
 $config =
     (new Config())
         ->setFolder('./easy-rsa')
+        ->setCertsFolder('./easy-rsa-certs')
         ->setArchive('./easy-rsa.tar.gz');
 
 $wrp = new Wrapper($config);

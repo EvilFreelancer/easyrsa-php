@@ -30,6 +30,7 @@ class Wrapper
     public function __construct(Config $config)
     {
         $this->_certs_folder = realpath($config->getCertsFolder());
+        putenv("EASYRSA_PKI={$this->_certs_folder}");
         $this->_scripts_folder = realpath($config->getFolder()) . '/easyrsa3';
         $this->_import_req = $this->_certs_folder . '/import.req';
     }
