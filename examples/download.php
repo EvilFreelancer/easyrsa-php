@@ -6,8 +6,11 @@ use \EasyRSA\Downloader;
 
 $config =
     (new Config())
-        ->setFolder('./easy-rsa')
+        ->setCerts('./easy-rsa-certs')
+        ->setScripts('./easy-rsa')
         ->setArchive('./easy-rsa.tar.gz');
+
+print_r($config);
 
 $dnl = new Downloader($config);
 $dnl->getEasyRSA();

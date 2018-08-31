@@ -8,35 +8,32 @@ class Wrapper
      * Main location of easyrsa scripts
      * @var string
      */
-    private $_scripts_folder;
+    private $_scripts;
 
     /**
      * Path to folder with certificates
      * @var string
      */
-    private $_certs_folder;
-
-    /**
-     * The rrequest (.req) file
-     * @var string
-     */
-    private $_import_req;
+    private $_certs;
 
     /**
      * Wrapper constructor, need configuration for normal usage
      *
      * @param   Config $config
+     * @throws  \RuntimeException
      */
     public function __construct(Config $config)
     {
-        $this->_certs_folder = realpath($config->getCertsFolder());
-        putenv("EASYRSA_PKI={$this->_certs_folder}");
-        if (@mkdir($this->_certs_folder, 0755, true) || is_dir($this->_certs_folder)) {
-            error_log("Folder '{$this->_certs_folder}' created");
+        // Create folders for certificates
+        $this->_certs = $config->getCerts();
+        putenv("EASYRSA_PKI={$this->_certs}");
+        if (@mkdir($this->_certs, 0755, true) || is_dir($this->_certs)) {
+            error_log("Folder '{$this->_certs}' created");
+        } else {
+            throw new \RuntimeException("Folder {$this->_certs} can't be created");
         }
 
-        $this->_scripts_folder = realpath($config->getFolder()) . '/easyrsa3';
-        $this->_import_req = $this->_certs_folder . '/import.req';
+        $this->_scripts = $config->getScripts();
     }
 
     /**
@@ -47,9 +44,41 @@ class Wrapper
      */
     private function exec(string $cmd): array
     {
-        chdir($this->_certs_folder);
-        exec($this->_scripts_folder . '/easyrsa --batch ' . $cmd, $result);
+        chdir($this->_certs);
+        exec($this->_scripts . '/easyrsa3/easyrsa --batch ' . $cmd, $result);
         return $result;
+    }
+
+    public function init_pki(): array
+    {
+        return $this->exec('init-pki');
+    }
+
+    public function build_ca(bool $nopass = false): array
+    {
+        $param = $nopass ? 'nopass' : '';
+        return $this->exec("build-ca $param");
+    }
+
+    public function gen_dh(): array
+    {
+        return $this->exec('gen-dh');
+    }
+
+    public function gen_req(string $name, bool $nopass = false): array
+    {
+        $param = $nopass ? 'nopass' : '';
+        return $this->exec("gen-req $name $param");
+    }
+
+    public function sign_req_client(string $filename): array
+    {
+        return $this->exec("sign-req server $filename");
+    }
+
+    public function sign_req_server(string $filename): array
+    {
+        return $this->exec("sign-req client $filename");
     }
 
     public function build_client_full(string $name, bool $nopass = false): array
@@ -64,26 +93,19 @@ class Wrapper
         return $this->exec("build-server-full $name $param");
     }
 
-    public function init_pki(): array
+    public function revoke(string $filename): array
     {
-        return $this->exec('init-pki');
+        return $this->exec("revoke $filename");
     }
 
-    public function build_ca(bool $nopass = false): array
+    public function gen_crl(): array
     {
-        $param = $nopass ? 'nopass' : '';
-        return $this->exec("build-ca $param");
+        return $this->exec('gen-crl');
     }
 
-    public function gen_req(string $name, bool $nopass = false): array
+    public function update_db(): array
     {
-        $param = $nopass ? 'nopass' : '';
-        return $this->exec("gen-req $name $param");
-    }
-
-    public function import_req(string $filename): array
-    {
-        return $this->exec("import-req {$this->_import_req} $filename");
+        return $this->exec('update-db');
     }
 
     public function show_req(string $filename): array
@@ -91,19 +113,33 @@ class Wrapper
         return $this->exec("show-req $filename");
     }
 
-    public function sign_req_client(string $filename): array
+    public function show_cert(string $filename): array
     {
-        return $this->exec("sign-req server $filename");
+        return $this->exec("show-cert $filename");
     }
 
-    public function sign_req_server(string $filename): array
+    public function import_req(string $request_file_path, string $short_basename): array
     {
-        return $this->exec("sign-req client $filename");
+        return $this->exec("import-req $request_file_path $short_basename");
     }
 
-    public function gen_dh(): array
+    public function export_p7(string $filename): array
     {
-        return $this->exec('gen-dh');
+        return $this->exec("export-p7 $filename");
     }
 
+    public function export_p12(string $filename): array
+    {
+        return $this->exec("export-p12 $filename");
+    }
+
+    public function set_rsa_pass(string $filename): array
+    {
+        return $this->exec("set-rsa-pass $filename");
+    }
+
+    public function set_ec_pass(string $filename): array
+    {
+        return $this->exec("set-ec-pass $filename");
+    }
 }

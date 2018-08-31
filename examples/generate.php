@@ -11,9 +11,11 @@ use \EasyRSA\Wrapper;
 
 $config =
     (new Config())
-        ->setFolder('./easy-rsa')
-        ->setCertsFolder('./easy-rsa-certs')
+        ->setCerts('./easy-rsa-certs')
+        ->setScripts('./easy-rsa')
         ->setArchive('./easy-rsa.tar.gz');
+
+print_r($config);
 
 $wrp = new Wrapper($config);
 $wrp->init_pki();

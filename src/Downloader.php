@@ -87,13 +87,16 @@ class Downloader
      */
     public function extractArchive(): array
     {
-        $folder = $this->_config->getFolder();
+        $scripts = $this->_config->getScripts();
         $archive = $this->_config->getArchive();
         $result = [];
 
         // Extract only if folder exist
-        if (@mkdir($folder, 0755, true) || is_dir($folder)) {
-            exec("/usr/bin/env tar xfvz {$archive} -C {$folder} --strip-components=1", $result);
+        if (@mkdir($scripts, 0755, true) || is_dir($scripts)) {
+            error_log("Folder '$scripts' created");
+            exec("/usr/bin/env tar xfvz $archive -C $scripts --strip-components=1", $result);
+        } else {
+            throw new \RuntimeException("Folder $scripts can't be created");
         }
         return $result;
     }

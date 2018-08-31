@@ -69,16 +69,16 @@ Result of this script will be in `easy-rsa-certs` folder.
 
 ## List of all `Wrapper` methods
 
-    init_pki()
-    build_ca(bool $nopass = false)
-    build_client_full(string $name, bool $nopass = false)
-    build_server_full(string $name, bool $nopass = false)
-    gen_req(string $name, bool $nopass = false)
-    import_req(string $filename)
-    show_req(string $filename)
-    sign_req_client(string $filename)
-    sign_req_server(string $filename)
-    gen_dh()
+* init_pki()
+* build_ca(bool $nopass = false)
+* build_client_full(string $name, bool $nopass = false)
+* build_server_full(string $name, bool $nopass = false)
+* gen_req(string $name, bool $nopass = false)
+* import_req(string $filename)
+* show_req(string $filename)
+* sign_req_client(string $filename)
+* sign_req_server(string $filename)
+* gen_dh()
 
 ## Links
 
