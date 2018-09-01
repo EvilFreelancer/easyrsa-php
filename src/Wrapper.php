@@ -37,6 +37,40 @@ class Wrapper
     }
 
     /**
+     * Show content of certificate file
+     *
+     * @param   string $filename Only name of file must be set, without path
+     * @return  bool|string
+     */
+    public function getContent(string $filename)
+    {
+        switch ($filename) {
+            case 'ca.crt':
+            case 'dh.pem':
+                $path = $this->_certs . '/' . $filename;
+                break;
+            default:
+                $ext = pathinfo($filename, PATHINFO_EXTENSION);
+                switch ($ext) {
+                    case 'crt':
+                        $path = $this->_certs . '/issued/' . $filename;
+                        break;
+                    case 'key':
+                        $path = $this->_certs . '/private/' . $filename;
+                        break;
+                    case 'req':
+                        $path = $this->_certs . '/reqs/' . $filename;
+                        break;
+                    default:
+                        $path = false;
+                        break;
+                }
+                break;
+        }
+        return file_get_contents($path);
+    }
+
+    /**
      * Execute some command and return result
      *
      * @param   string $cmd
