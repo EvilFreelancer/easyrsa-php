@@ -29,6 +29,11 @@ class Wrapper
     private const NOPASS = 'nopass';
 
     /**
+     * If need to enable debug mode
+     */
+    public bool $dryRun = false;
+
+    /**
      * Wrapper constructor, need configuration for normal usage
      *
      * @param \EasyRSA\Interfaces\ConfigInterface $config
@@ -92,8 +97,15 @@ class Wrapper
      */
     private function exec(string $cmd): array
     {
-        chdir($this->certs);
-        exec($this->scripts . '/easyrsa3/easyrsa --batch ' . $cmd, $result);
+        $command = $this->scripts . '/easyrsa3/easyrsa --batch ' . $cmd;
+
+        // In dry run mode need just return command without real execution
+        if ($this->dryRun) {
+            $result = [$command];
+        } else {
+            chdir($this->certs);
+            exec($this->scripts . '/easyrsa3/easyrsa --batch ' . $cmd, $result);
+        }
 
         return $result;
     }
