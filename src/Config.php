@@ -1,91 +1,108 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EasyRSA;
 
-class Config
+use function count;
+use EasyRSA\Interfaces\ConfigInterface;
+
+/**
+ * Class Config.
+ */
+class Config implements ConfigInterface
 {
     /**
-     * Name of file (with or without full path to this file)
-     * @var string
+     * Name of file (with or without full path to this file).
      */
-    private $_archive = './easy-rsa.tar.gz';
+    public string $archive = '.' . DIRECTORY_SEPARATOR . 'easy-rsa.tar.gz';
 
     /**
-     * Path to folder with easy-rsa scripts
-     * @var string
+     * Path to folder with easy-rsa scripts.
      */
-    private $_scripts = './easy-rsa';
+    public string $scripts = '.' . DIRECTORY_SEPARATOR . 'easy-rsa';
 
     /**
-     * Path to folder with certificates
-     * @var string
+     * Path to folder with certificates.
      */
-    private $_certs = '.';
+    public string $certs = '.';
 
     /**
-     * Get path with certificates
+     * Config constructor.
      *
-     * @return string
+     * @param array<string, string> $parameters
+     */
+    public function __construct(array $parameters = [])
+    {
+        foreach ($parameters as $key => $value) {
+            $this->set($key, $value);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function set(string $name, string $value): ConfigInterface
+    {
+        $this->$name = $value;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function get(string $name): string
+    {
+        return $this->$name;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function getCerts(): string
     {
-        return $this->_certs;
+        return $this->certs;
     }
 
     /**
-     * Set full path to folder with certificates
-     *
-     * @param   string $folder
-     * @return  Config
+     * {@inheritdoc}
      */
-    public function setCerts(string $folder): self
+    public function setCerts(string $path): ConfigInterface
     {
-        $this->_certs = $this->resolvePath($folder);
-        return $this;
+        return $this->set('certs', $this->resolvePath($path));
     }
 
     /**
-     * Get full path to folder with scripts
-     *
-     * @return  string
+     * {@inheritdoc}
      */
     public function getScripts(): string
     {
-        return $this->_scripts;
+        return $this->scripts;
     }
 
     /**
-     * Set path with easy-rsa scripts
-     *
-     * @param   string $folder
-     * @return  Config
+     * {@inheritdoc}
      */
-    public function setScripts(string $folder): self
+    public function setScripts(string $path): ConfigInterface
     {
-        $this->_scripts = $this->resolvePath($folder);
-        return $this;
+        return $this->set('scripts', $this->resolvePath($path));
     }
 
     /**
-     * Get archive file with full path
-     *
-     * @return  string
+     * {@inheritdoc}
      */
     public function getArchive(): string
     {
-        return $this->_archive;
+        return $this->archive;
     }
 
     /**
-     * Set easy-rsa archive file with full path
-     *
-     * @param   string $archive
-     * @return  Config
+     * {@inheritdoc}
      */
-    public function setArchive(string $archive): self
+    public function setArchive(string $path): ConfigInterface
     {
-        $this->_archive = $this->resolvePath($archive);
-        return $this;
+        return $this->set('archive', $this->resolvePath($path));
     }
 
     /**
@@ -106,18 +123,19 @@ class Config
      *   resolvePath("/test/./me/../now/", "/www/example.com");
      *   => /test/now
      *
-     * @param string $path
-     * @param mixed $basePath resolve paths realtively to this path. Params:
-     *                        STRING: prefix with this path;
-     *                        TRUE: use current dir;
-     *                        FALSE: keep relative (default)
+     * @param string $path     Absolute or relative path on filesystem
+     * @param mixed  $basePath Resolve paths relatively to this path. Params:
+     *                         STRING: prefix with this path;
+     *                         TRUE: use current dir;
+     *                         FALSE: keep relative (default)
+     *
      * @return string resolved path
      */
-    public function resolvePath(string $path, $basePath = true): string
+    protected function resolvePath(string $path, $basePath = true): string
     {
         // Make absolute path
-        if ($path[0] !== DIRECTORY_SEPARATOR) {
-            if ($basePath === true) {
+        if (DIRECTORY_SEPARATOR !== $path[0]) {
+            if (true === $basePath) {
                 // Get PWD first to avoid getcwd() resolving symlinks if in symlinked folder
                 $path = (getenv('PWD') ?: getcwd()) . DIRECTORY_SEPARATOR . $path;
             } elseif ('' !== $basePath) {
@@ -126,11 +144,11 @@ class Config
         }
 
         // Resolve '.' and '..'
-        $components = array();
+        $components = [];
         foreach (explode(DIRECTORY_SEPARATOR, rtrim($path, DIRECTORY_SEPARATOR)) as $name) {
-            if ($name === '..') {
+            if ('..' === $name) {
                 array_pop($components);
-            } elseif ($name !== '.' && !(\count($components) && $name === '')) {
+            } elseif ('.' !== $name && !(count($components) && '' === $name)) {
                 // … && !(count($components) && $name === '') - we want to keep initial '/' for abs paths
                 $components[] = $name;
             }

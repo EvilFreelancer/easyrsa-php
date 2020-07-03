@@ -1,37 +1,46 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EasyRSA;
 
-class Downloader
+use EasyRSA\Interfaces\ConfigInterface;
+use EasyRSA\Interfaces\DownloaderInterface;
+use RuntimeException;
+
+class Downloader implements DownloaderInterface
 {
     /**
-     * Url via which possible to get the latest release of EasyRSA
+     * Url via which possible to get the latest release of EasyRSA.
      */
-    const URL_LATEST_RELEASE = 'https://api.github.com/repos/OpenVPN/easy-rsa/releases/latest';
+    public const URL_LATEST_RELEASE = 'https://api.github.com/repos/OpenVPN/easy-rsa/releases/latest';
 
     /**
-     * @var Config
+     * @var \EasyRSA\Interfaces\ConfigInterface
      */
-    private $_config;
+    private ConfigInterface $config;
 
     /**
-     * Downloader constructor, need configuration for normal usage
+     * Downloader constructor, need configuration for normal usage.
      *
-     * @param   Config $config
+     * @param \EasyRSA\Interfaces\ConfigInterface $config
      */
-    public function __construct(Config $config)
+    public function __construct(ConfigInterface $config)
     {
-        $this->_config = $config;
+        $this->config = $config;
     }
 
     /**
-     * Exec some operation by cURL
+     * Exec some operation by cURL.
      *
-     * @param   string $url
-     * @param   string|null $filename
-     * @return  mixed
+     * TODO: Rewrite to Guzzle
+     *
+     * @param string      $url
+     * @param string|null $filename
+     *
+     * @return string|null
      */
-    private function curlExec(string $url, string $filename = null)
+    private function curlExec(string $url, string $filename = null): ?string
     {
         $curl = curl_init();
 
@@ -48,65 +57,61 @@ class Downloader
 
         $result = curl_exec($curl);
         curl_close($curl);
-        return $result;
+
+        return is_bool($result) ? null : $result;
     }
 
     /**
-     * Get latest release of EasyRSA
-     *
-     * @return  string
+     * {@inheritdoc}
      */
-    public function releasesLatest(): string
+    public function getLatestVersion(): string
     {
         $json = $this->curlExec(self::URL_LATEST_RELEASE);
-        $json = json_decode($json, true);
+        $json = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+
         return $json['tarball_url'];
     }
 
     /**
-     * Download latest release to specified path
-     *
-     * @return  string
+     * {@inheritdoc}
      */
-    public function downloadLatest(): string
+    public function downloadLatestVersion(): ?string
     {
         // Get full path to archive file
-        $filename = $this->_config->getArchive();
+        $filename = $this->config->getArchive();
 
         // Get url with latest release
-        $latest = $this->releasesLatest();
+        $latest = $this->getLatestVersion();
 
         // Download and return status
         return $this->curlExec($latest, $filename);
     }
 
     /**
-     * Extract ZIP archive
-     *
-     * @return  array Array will be filled with every line of output from the command
+     * {@inheritdoc}
      */
     public function extractArchive(): array
     {
-        $scripts = $this->_config->getScripts();
-        $archive = $this->_config->getArchive();
-        $result = [];
+        $scripts = $this->config->getScripts();
+        $archive = $this->config->getArchive();
+        $result  = [];
 
         // Extract only if folder exist
-        if (@mkdir($scripts, 0755, true) || is_dir($scripts)) {
-            error_log("Folder '$scripts' created");
+        if (mkdir($scripts, 0755, true) || is_dir($scripts)) {
             exec("/usr/bin/env tar xfvz $archive -C $scripts --strip-components=1", $result);
         } else {
-            throw new \RuntimeException("Folder $scripts can't be created");
+            throw new RuntimeException("Folder $scripts can't be created");
         }
+
         return $result;
     }
 
     /**
-     * Get latest release of EasyRSA and extract it to some folder
+     * {@inheritdoc}
      */
-    public function getEasyRSA()
+    public function getEasyRSA(): void
     {
-        $this->downloadLatest();
+        $this->downloadLatestVersion();
         $this->extractArchive();
     }
 }
