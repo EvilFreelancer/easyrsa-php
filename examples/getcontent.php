@@ -1,8 +1,9 @@
 <?php
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use \EasyRSA\Config;
-use \EasyRSA\Wrapper;
+use EasyRSA\Config;
+use EasyRSA\Wrapper;
 
 $config =
     (new Config())

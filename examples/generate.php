@@ -1,13 +1,15 @@
 <?php
+
 require_once __DIR__ . '/../vendor/autoload.php';
+
+use Dotenv\Dotenv;
+use EasyRSA\Config;
+use EasyRSA\Wrapper;
 
 // Load dotenv?
 if (file_exists(__DIR__ . '/vars.example')) {
-    (new Dotenv\Dotenv(__DIR__, 'vars.example'))->load();
+    Dotenv::createImmutable(__DIR__, 'vars.example')->load();
 }
-
-use \EasyRSA\Config;
-use \EasyRSA\Wrapper;
 
 $config =
     (new Config())
