@@ -4,4 +4,4 @@
 /examples/easy-rsa*
 /examples/pki/
 /.php_cs.cache
-
+/.phpunit.result.cache
