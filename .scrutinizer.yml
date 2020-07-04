@@ -7,7 +7,6 @@ build:
       tests:
         override:
           - php-scrutinizer-run
-          - phpcs-run
   tests:
     override:
       - command: 'vendor/bin/phpunit --coverage-clover=coverage.xml'
@@ -20,3 +19,4 @@ filter:
     - ".github/"
     - "examples/"
     - "tests/"
+    - "vendor/"
