@@ -6,6 +6,7 @@ namespace EasyRSA;
 
 use function count;
 use EasyRSA\Interfaces\ConfigInterface;
+use InvalidArgumentException;
 
 /**
  * Class Config.
@@ -28,6 +29,15 @@ class Config implements ConfigInterface
     public string $certs = '.';
 
     /**
+     * List of allowed variables
+     */
+    public const ALLOWED = [
+        'scripts',
+        'archive',
+        'certs',
+    ];
+
+    /**
      * Config constructor.
      *
      * @param array<string, string> $parameters
@@ -41,101 +51,102 @@ class Config implements ConfigInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws \InvalidArgumentException If wrong key name provided
      */
-    public function set(string $name, string $value): ConfigInterface
+    public function set(string $name, string $value = null, bool $resolveAbsolutePath = true): ConfigInterface
     {
-        $this->$name = $value;
+        if (!in_array($name, self::ALLOWED, true)) {
+            throw new InvalidArgumentException('Parameter "' . $name . '" is not in allowed list [' . implode(',', self::ALLOWED) . ']');
+        }
+
+        $this->$name = $resolveAbsolutePath ? $this->resolvePath($value) : $value;
 
         return $this;
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws \InvalidArgumentException If wrong key name provided
      */
     public function get(string $name): string
     {
+        if (!in_array($name, self::ALLOWED, true)) {
+            throw new InvalidArgumentException('Parameter "' . $name . '" is not in allowed list [' . implode(',', self::ALLOWED) . ']');
+        }
+
         return $this->$name;
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     public function getCerts(): string
     {
-        return $this->certs;
+        return $this->get('certs');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     public function setCerts(string $path): ConfigInterface
     {
-        return $this->set('certs', $this->resolvePath($path));
+        return $this->set('certs', $path, true);
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     public function getScripts(): string
     {
-        return $this->scripts;
+        return $this->get('scripts');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     public function setScripts(string $path): ConfigInterface
     {
-        return $this->set('scripts', $this->resolvePath($path));
+        return $this->set('scripts', $path, true);
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     public function getArchive(): string
     {
-        return $this->archive;
+        return $this->get('archive');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     public function setArchive(string $path): ConfigInterface
     {
-        return $this->set('archive', $this->resolvePath($path));
+        return $this->set('archive', $path, true);
     }
 
     /**
-     * Remove '.' and '..' path parts and make path absolute without
-     * resolving symlinks.
-     *
-     * Examples:
-     *
-     *   resolvePath("test/./me/../now/", false);
-     *   => test/now
-     *
-     *   resolvePath("test///.///me///../now/", true);
-     *   => /home/example/test/now
-     *
-     *   resolvePath("test/./me/../now/", "/www/example.com");
-     *   => /www/example.com/test/now
-     *
-     *   resolvePath("/test/./me/../now/", "/www/example.com");
-     *   => /test/now
-     *
-     * @param string $path     Absolute or relative path on filesystem
-     * @param mixed  $basePath Resolve paths relatively to this path. Params:
-     *                         STRING: prefix with this path;
-     *                         TRUE: use current dir;
-     *                         FALSE: keep relative (default)
-     *
-     * @return string resolved path
+     * {@inheritDoc}
      */
-    protected function resolvePath(string $path, $basePath = true): string
+    public function resolvePath(string $path, string $basePath = null): string
     {
         // Make absolute path
         if (DIRECTORY_SEPARATOR !== $path[0]) {
-            if (true === $basePath) {
+            if (null === $basePath) {
                 // Get PWD first to avoid getcwd() resolving symlinks if in symlinked folder
                 $path = (getenv('PWD') ?: getcwd()) . DIRECTORY_SEPARATOR . $path;
             } elseif ('' !== $basePath) {
@@ -148,7 +159,7 @@ class Config implements ConfigInterface
         foreach (explode(DIRECTORY_SEPARATOR, rtrim($path, DIRECTORY_SEPARATOR)) as $name) {
             if ('..' === $name) {
                 array_pop($components);
-            } elseif ('.' !== $name && !(count($components) && '' === $name)) {
+            } elseif ('.' !== $name && !(count($components) > 0 && '' === $name)) {
                 // … && !(count($components) && $name === '') - we want to keep initial '/' for abs paths
                 $components[] = $name;
             }
