@@ -27,8 +27,9 @@ use \EasyRSA\Downloader;
 
 $config =
     (new Config())
-        ->setFolder('./easy-rsa')
-        ->setArchive('./easy-rsa.tar.gz');
+        ->set('archive', './easy-rsa.tar.gz')
+        ->set('scripts', './easy-rsa')
+        ->set('certs', './easy-rsa-certs');
 
 $dnl = new Downloader($config);
 $dnl->getEasyRSA();
@@ -52,9 +53,8 @@ use \EasyRSA\Wrapper;
 
 $config =
     (new Config())
-        ->setFolder('./easy-rsa')
-        ->setCertsFolder('./easy-rsa-certs')
-        ->setArchive('./easy-rsa.tar.gz');
+        ->set('scripts', './easy-rsa')
+        ->set('certs', './easy-rsa-certs');
 
 $wrp = new Wrapper($config);
 $wrp->init_pki();
@@ -103,9 +103,8 @@ use \EasyRSA\Wrapper;
 
 $config =
     (new Config())
-        ->setCerts('./easy-rsa-certs')
-        ->setScripts('./easy-rsa')
-        ->setArchive('./easy-rsa.tar.gz');
+        ->set('scripts', './easy-rsa')
+        ->set('certs', './easy-rsa-certs');
 
 $wrp = new Wrapper($config);
 
