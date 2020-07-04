@@ -26,7 +26,7 @@ class Config implements ConfigInterface
     /**
      * Path to folder with certificates.
      */
-    public string $certs = '.';
+    public string $certs = '.' . DIRECTORY_SEPARATOR . 'easy-rsa-certs';
 
     /**
      * List of allowed variables
