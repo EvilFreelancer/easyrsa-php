@@ -1,10 +1,10 @@
 [![Latest Stable Version](https://poser.pugx.org/evilfreelancer/easyrsa-php/v/stable)](https://packagist.org/packages/evilfreelancer/easyrsa-php)
-[![Build Status](https://travis-ci.org/EvilFreelancer/easyrsa-php.svg?branch=master)](https://travis-ci.org/EvilFreelancer/easyrsa-php)
 [![Total Downloads](https://poser.pugx.org/evilfreelancer/easyrsa-php/downloads)](https://packagist.org/packages/evilfreelancer/easyrsa-php)
-[![License](https://poser.pugx.org/evilfreelancer/easyrsa-php/license)](https://packagist.org/packages/evilfreelancer/easyrsa-php)
-[![PHP 7 ready](https://php7ready.timesplinter.ch/EvilFreelancer/easyrsa-php/master/badge.svg)](https://travis-ci.org/EvilFreelancer/easyrsa-php)
+[![Build Status](https://scrutinizer-ci.com/g/EvilFreelancer/easyrsa-php/badges/build.png?b=master)](https://scrutinizer-ci.com/g/EvilFreelancer/easyrsa-php/build-status/master)
+[![Code Coverage](https://scrutinizer-ci.com/g/EvilFreelancer/easyrsa-php/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/EvilFreelancer/easyrsa-php/?branch=master)
 [![Code Climate](https://codeclimate.com/github/EvilFreelancer/easyrsa-php/badges/gpa.svg)](https://codeclimate.com/github/EvilFreelancer/easyrsa-php)
-[![Scrutinizer CQ](https://scrutinizer-ci.com/g/evilfreelancer/easyrsa-php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/evilfreelancer/easyrsa-php/)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/EvilFreelancer/easyrsa-php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/EvilFreelancer/easyrsa-php/?branch=master)
+[![License](https://poser.pugx.org/evilfreelancer/easyrsa-php/license)](https://packagist.org/packages/evilfreelancer/easyrsa-php)
 
 # EasyRSA wrapper for PHP
 
