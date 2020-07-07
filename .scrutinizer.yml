@@ -20,3 +20,4 @@ filter:
     - "examples/"
     - "tests/"
     - "vendor/"
+    - "configs/"
