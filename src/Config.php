@@ -29,18 +29,12 @@ class Config implements ConfigInterface
     public string $certs = '.' . DIRECTORY_SEPARATOR . 'easy-rsa-certs';
 
     /**
-     * If need automatically create required folders
-     */
-    public bool $autocreate = true;
-
-    /**
      * List of allowed variables
      */
     public const ALLOWED = [
         'scripts',
         'archive',
         'certs',
-        'autocreate',
     ];
 
     /**
@@ -66,11 +60,7 @@ class Config implements ConfigInterface
             throw new InvalidArgumentException('Parameter "' . $name . '" is not in allowed list [' . implode(',', self::ALLOWED) . ']');
         }
 
-        if ('autocreate' === $name) {
-            $this->autocreate = (bool) $value;
-        } else {
-            $this->$name = $resolveAbsolutePath ? $this->resolvePath($value) : $value;
-        }
+        $this->$name = $resolveAbsolutePath ? $this->resolvePath($value) : $value;
 
         return $this;
     }
