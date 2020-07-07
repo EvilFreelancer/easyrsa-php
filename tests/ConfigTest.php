@@ -56,25 +56,46 @@ class ConfigTest extends TestCase
         $this->object->get('wrong');
     }
 
-    public function testGet(): void
+    public function getDataProvider(): array
     {
-        $test1 = $this->object->get('archive');
-        $test2 = $this->object->get('scripts');
-        $test3 = $this->object->get('certs');
-
-        $this->assertEquals('.' . DIRECTORY_SEPARATOR . 'easy-rsa.tar.gz', $test1);
-        $this->assertEquals('.' . DIRECTORY_SEPARATOR . 'easy-rsa', $test2);
-        $this->assertEquals('.', $test3);
+        return [
+            ['key' => 'archive', 'result' => '.' . DIRECTORY_SEPARATOR . 'easy-rsa.tar.gz'],
+            ['key' => 'scripts', 'result' => '.' . DIRECTORY_SEPARATOR . 'easy-rsa'],
+            ['key' => 'certs', 'result' => '.' . DIRECTORY_SEPARATOR . 'easy-rsa-certs'],
+        ];
     }
 
-    public function testResolvePath(): void
+    /**
+     * @dataProvider getDataProvider
+     *
+     * @param string           $key
+     * @param string|bool|null $result
+     */
+    public function testGet(string $key, $result): void
     {
-        $test1 = $this->object->resolvePath('/home/test');
-        $test2 = $this->object->resolvePath('./test', '/home');
-        $test3 = $this->object->resolvePath('./../test', '/home');
+        $test = $this->object->get($key);
+        $this->assertEquals($result, $test);
+    }
 
-        $this->assertEquals('/home/test', $test1);
-        $this->assertEquals('/home/test', $test2);
-        $this->assertEquals('/test', $test3);
+    public function resolvePathDataProvider(): array
+    {
+        return [
+            ['path' => '/home/test', 'result' => '/home/test'],
+            ['path' => '/home/../test', 'result' => '/test'],
+            ['path' => '/test', 'result' => '/test'],
+            ['path' => '/../test', 'result' => 'test'],
+        ];
+    }
+
+    /**
+     * @dataProvider resolvePathDataProvider
+     *
+     * @param string $path
+     * @param string $result
+     */
+    public function testResolvePath(string $path, string $result): void
+    {
+        $test = $this->object->resolvePath($path);
+        $this->assertEquals($result, $test);
     }
 }

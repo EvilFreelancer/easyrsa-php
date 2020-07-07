@@ -14,19 +14,24 @@ use InvalidArgumentException;
 class Config implements ConfigInterface
 {
     /**
-     * Name of file (with or without full path to this file).
+     * Path to archive with EasyRSA scripts
      */
     public string $archive = '.' . DIRECTORY_SEPARATOR . 'easy-rsa.tar.gz';
 
     /**
-     * Path to folder with easy-rsa scripts.
+     * Path to folder with EasyRSA scripts
      */
     public string $scripts = '.' . DIRECTORY_SEPARATOR . 'easy-rsa';
 
     /**
-     * Path to folder with certificates.
+     * Part to certificates store folder
      */
     public string $certs = '.' . DIRECTORY_SEPARATOR . 'easy-rsa-certs';
+
+    /**
+     * If need automatically create required folders
+     */
+    public bool $autocreate = true;
 
     /**
      * List of allowed variables
@@ -35,6 +40,7 @@ class Config implements ConfigInterface
         'scripts',
         'archive',
         'certs',
+        'autocreate',
     ];
 
     /**
@@ -54,13 +60,17 @@ class Config implements ConfigInterface
      *
      * @throws \InvalidArgumentException If wrong key name provided
      */
-    public function set(string $name, string $value = null, bool $resolveAbsolutePath = true): ConfigInterface
+    public function set(string $name, $value = null, bool $resolveAbsolutePath = true): ConfigInterface
     {
         if (!in_array($name, self::ALLOWED, true)) {
             throw new InvalidArgumentException('Parameter "' . $name . '" is not in allowed list [' . implode(',', self::ALLOWED) . ']');
         }
 
-        $this->$name = $resolveAbsolutePath ? $this->resolvePath($value) : $value;
+        if ('autocreate' === $name) {
+            $this->autocreate = (bool) $value;
+        } else {
+            $this->$name = $resolveAbsolutePath ? $this->resolvePath($value) : $value;
+        }
 
         return $this;
     }
@@ -70,7 +80,7 @@ class Config implements ConfigInterface
      *
      * @throws \InvalidArgumentException If wrong key name provided
      */
-    public function get(string $name): string
+    public function get(string $name)
     {
         if (!in_array($name, self::ALLOWED, true)) {
             throw new InvalidArgumentException('Parameter "' . $name . '" is not in allowed list [' . implode(',', self::ALLOWED) . ']');
@@ -81,66 +91,6 @@ class Config implements ConfigInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @codeCoverageIgnore
-     */
-    public function getCerts(): string
-    {
-        return $this->get('certs');
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @codeCoverageIgnore
-     */
-    public function setCerts(string $path): ConfigInterface
-    {
-        return $this->set('certs', $path, true);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @codeCoverageIgnore
-     */
-    public function getScripts(): string
-    {
-        return $this->get('scripts');
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @codeCoverageIgnore
-     */
-    public function setScripts(string $path): ConfigInterface
-    {
-        return $this->set('scripts', $path, true);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @codeCoverageIgnore
-     */
-    public function getArchive(): string
-    {
-        return $this->get('archive');
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @codeCoverageIgnore
-     */
-    public function setArchive(string $path): ConfigInterface
-    {
-        return $this->set('archive', $path, true);
-    }
-
-    /**
-     * {@inheritDoc}
      */
     public function resolvePath(string $path, string $basePath = null): string
     {
@@ -166,5 +116,68 @@ class Config implements ConfigInterface
         }
 
         return implode(DIRECTORY_SEPARATOR, $components);
+    }
+
+    /**
+     * @codeCoverageIgnore
+     * @deprecated Use ->get('certs')
+     */
+    public function getCerts(): string
+    {
+        return $this->get('certs');
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return \EasyRSA\Interfaces\ConfigInterface
+     * @codeCoverageIgnore
+     * @deprecated Use ->set('certs')
+     */
+    public function setCerts(string $path): ConfigInterface
+    {
+        return $this->set('certs', $path, true);
+    }
+
+    /**
+     * @codeCoverageIgnore
+     * @deprecated Use ->get('scripts')
+     */
+    public function getScripts(): string
+    {
+        return $this->get('scripts');
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return \EasyRSA\Interfaces\ConfigInterface
+     * @codeCoverageIgnore
+     * @deprecated Use ->set('scripts')
+     */
+    public function setScripts(string $path): ConfigInterface
+    {
+        return $this->set('scripts', $path, true);
+    }
+
+    /**
+     * @codeCoverageIgnore
+     * @deprecated Use ->get('archive')
+     */
+    public function getArchive(): string
+    {
+        return $this->get('archive');
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return \EasyRSA\Interfaces\ConfigInterface
+     * @codeCoverageIgnore
+     * @deprecated Use ->set('archive')
+     */
+    public function setArchive(string $path): ConfigInterface
+    {
+        return $this->set('archive', $path, true);
     }
 }
