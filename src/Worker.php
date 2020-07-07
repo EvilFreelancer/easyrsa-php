@@ -94,8 +94,13 @@ class Worker implements WorkerInterface
         if ($this->dryRun) {
             $result = [$command];
         } else {
+
             // Create folder if not exist
-            if (!mkdir($this->config->get('certs'), 0755, true) && !is_dir($this->config->get('certs'))) {
+            if (
+                !file_exists($this->config->get('certs'))
+                && !mkdir($this->config->get('certs'), 0755, true)
+                && !is_dir($this->config->get('certs'))
+            ) {
                 throw new RuntimeException("Folder \"{$this->config->get('certs')}\" can't be created");
             }
 
