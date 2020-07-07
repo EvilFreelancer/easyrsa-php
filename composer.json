@@ -58,5 +58,15 @@
       "@test:types",
       "@test:unit"
     ]
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "EasyRSA\\Laravel\\ServiceProvider"
+      ],
+      "aliases": {
+        "EasyRSA": "EasyRSA\\Laravel\\Facade"
+      }
+    }
   }
 }
