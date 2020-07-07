@@ -2,16 +2,10 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use EasyRSA\Config;
 use EasyRSA\Downloader;
 
-$config = new Config([
-    'certs'   => './easy-rsa-certs',
-    'scripts' => './easy-rsa',
+$dnl = new Downloader([
     'archive' => './easy-rsa.tar.gz',
+    'scripts' => './easy-rsa',
 ]);
-
-print_r($config);
-
-$dnl = new Downloader($config);
 $dnl->getEasyRSA();
