@@ -8,30 +8,31 @@
 
 # EasyRSA wrapper for PHP
 
+An easy way to use the [official EasyRSA](https://github.com/OpenVPN/easy-rsa) collection of shell
+scripts in your application.
+
     composer require evilfreelancer/easyrsa-php
+
+By the way, EasyRSA library support Laravel and Lumen frameworks, details [here](#frameworks-support).
 
 ## How to use
 
 More examples you can find [here](examples).
 
-### Download latest release of EasyRSA
+### Download the latest release of EasyRSA
 
-Before you start use this script need to download the `easyrsa` package.
+Before you start use this script need to download the [easy-rsa](https://github.com/OpenVPN/easy-rsa) package.
 
 ```php
-<?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use \EasyRSA\Config;
-use \EasyRSA\Downloader;
+use EasyRSA\Downloader;
 
-$config =
-    (new Config())
-        ->set('archive', './easy-rsa.tar.gz')
-        ->set('scripts', './easy-rsa')
-        ->set('certs', './easy-rsa-certs');
+$dnl = new Downloader([
+    'archive' => './easy-rsa.tar.gz',
+    'scripts' => './easy-rsa',
+]);
 
-$dnl = new Downloader($config);
 $dnl->getEasyRSA();
 ```
 
@@ -40,85 +41,156 @@ Result of this script will be in `easy-rsa` folder.
 ### Generate certificates
 
 ```php
-<?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
+use Dotenv\Dotenv;
+use EasyRSA\Commands;
+
 // Load dotenv?
-if (file_exists(__DIR__ . '/vars.example')) {
-    (new Dotenv\Dotenv(__DIR__, 'vars.example'))->load();
+if (file_exists(__DIR__ . '/../vars.example')) {
+    Dotenv::createImmutable(__DIR__ . '/../', 'vars.example')->load();
 }
 
-use \EasyRSA\Config;
-use \EasyRSA\Wrapper;
+$cmd = new Commands([
+    'scripts' => './easy-rsa',
+    'certs'   => './easy-rsa-certs',
+]);
 
-$config =
-    (new Config())
-        ->set('scripts', './easy-rsa')
-        ->set('certs', './easy-rsa-certs');
-
-$wrp = new Wrapper($config);
-$wrp->init_pki();
-$wrp->build_ca(true);
-$wrp->gen_dh();
-$wrp->build_server_full('server', true);
-$wrp->build_client_full('client1', true);
-$wrp->build_client_full('client2', true);
+$cmd->initPKI();
+$cmd->buildCA(true);
+$cmd->genDH();
+$cmd->buildServerFull('server', true);
+$cmd->buildClientFull('client1', true);
+$cmd->buildClientFull('client2', true);
 ```
 
 Result of this script will be in `easy-rsa-certs` folder.
 
-## List of all `Wrapper` methods
+### List of all available commands
 
-Main methods
+| Method                                              | Description |
+|-----------------------------------------------------|-------------|
+| getContent(string $filename)                        | Show content of any certificate available in "certs" folder |
+| initPKI()                                           | Instantiate Public Key Infrastructure (PKI) |
+| buildCA(bool $nopass = false)                       | Build Certificate Authority (CA) |
+| genDH()                                             | Generate Diffie-Hellman certificate (DH) |
+| genReq()                                            | Generate request for certificate |
+| signReqClient(string $filename)                     | Sign request for client certificate |
+| signReqServer(string $filename)                     | Sign request for server certificate |
+| buildClientFull(string $name, bool $nopass = false) | Build public and private key of client |
+| buildServerFull(string $name, bool $nopass = false) | Build public and private key of server |
+| revoke(string $filename)                            | Revoke certificate |
+| genCRL()                                            | Generate Certificate Revocation List (CRL) |
+| updateDB()                                          | Update certificates database |
+| showCert(string $filename)                          | Display information about certificate |
+| showReq(string $filename)                           | Display information about request |
+| importReq(string $filename)                         | Import request |
+| exportP7(string $filename)                          | Export file in format of Public-Key Cryptography Standards (PKCS) v7 (P7) |
+| exportP12(string $filename)                         | Export file in format of Public-Key Cryptography Standards (PKCS) v12 (P12) |
+| setRSAPass(string $filename)                        | Set password in Rivest–Shamir–Adleman (RSA) format |
+| setECPass(string $filename)                         | Set password in Elliptic Curve (EC) format |
 
-* init_pki()
-* build_ca(bool $nopass = false)
-* gen_dh()
-* gen_req(string $name, bool $nopass = false)
-* sign_req_client(string $filename)
-* sign_req_server(string $filename)
-* build_client_full(string $name, bool $nopass = false)
-* build_server_full(string $name, bool $nopass = false)
-* revoke(string $filename)
-* gen_crl()
-* update_db()
-* show_req(string $filename)
-* show_cert(string $filename)
-* import_req(string $filename)
-* export_p7(string $filename)
-* export_p12(string $filename)
-* set_rsa_pass(string $filename)
-* set_ec_pass(string $filename)
-
-Optional method
-
-* getContent() - Show content of any certificates what was created
+You also can read content of generated certificate via `getConfig($filename)` method:
 
 ```php
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use \EasyRSA\Config;
-use \EasyRSA\Wrapper;
+use \EasyRSA\Commands;
 
-$config =
-    (new Config())
-        ->set('scripts', './easy-rsa')
-        ->set('certs', './easy-rsa-certs');
+$cmd = new Commands([
+    'scripts' => './easy-rsa',
+    'certs'   => './easy-rsa-certs',
+]);
 
-$wrp = new Wrapper($config);
-
-$file = $wrp->getContent('ca.crt');
+$file = $cmd->getContent('ca.crt');
 echo "$file\n";
 
-$file = $wrp->getContent('server.crt');
+$file = $cmd->getContent('server.crt');
 echo "$file\n";
 
-$file = $wrp->getContent('server.key');
+$file = $cmd->getContent('server.key');
 echo "$file\n";
+```
+
+## Environment variables
+
+You can set these variables via environment on host system or with help
+of [vlucas/phpdotenv](https://github.com/vlucas/phpdotenv) library or via
+any other way which you like.
+
+```dotenv
+EASYRSA_DN="cn_only"
+#EASYRSA_DN="org"
+EASYRSA_REQ_COUNTRY="DE"
+EASYRSA_REQ_PROVINCE="California"
+EASYRSA_REQ_CITY="San Francisco"
+EASYRSA_REQ_ORG="Copyleft Certificate Co"
+EASYRSA_REQ_EMAIL="me@example.net"
+EASYRSA_REQ_OU="My Organizational Unit"
+EASYRSA_REQ_CN="ChangeMe"
+EASYRSA_KEY_SIZE=2048
+EASYRSA_ALGO=rsa
+EASYRSA_CA_EXPIRE=3650
+EASYRSA_CERT_EXPIRE=3650
+EASYRSA_DIGEST="sha256"
+```
+
+Example of environment variables configuration which should be used on certificate
+build stage can be fond [here](vars.example). 
+
+## Frameworks support
+
+### Laravel
+
+The package's service provider will automatically register its service provider.
+
+Publish the `easy-rsa.php` configuration file:
+
+```sh
+php artisan vendor:publish --provider="EasyRSA\Laravel\ServiceProvider"
+```
+
+#### Alternative configuration method via .env file
+
+After you publish the configuration file as suggested above, you may configure library
+by adding the following to your application's `.env` file (with appropriate values):
+  
+```ini
+EASYRSA_WORKER=default
+EASYRSA_ARCHIVE=./easy-rsa.tar.gz
+EASYRSA_SCRIPTS=./easy-rsa
+EASYRSA_CERTS=./easy-rsa-certs
+```
+
+### Lumen
+
+If you work with Lumen, please register the service provider and configuration in `bootstrap/app.php`:
+
+```php
+$app->register(EasyRSA\Laravel\ServiceProvider::class);
+$app->configure('easy-rsa');
+```
+
+Manually copy the configuration file to your application.
+
+## Testing
+
+This library can tested in multiple different ways
+
+```shell script
+composer test:lint
+composer test:types
+composer test:unit
+```
+
+or just in one command
+
+```shell script
+composer test
 ```
 
 ## Links
 
-* https://github.com/RMerl/asuswrt-merlin/wiki/Generating-OpenVPN-keys-using-Easy-RSA
+* https://github.com/RMerl/asuswrt-merlin.ng/wiki/Generating-OpenVPN-keys-using-Easy-RSA
 * https://github.com/OpenVPN/easy-rsa
