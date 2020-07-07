@@ -24,7 +24,8 @@
   "require": {
     "php": "^7.4",
     "ext-curl": "*",
-    "ext-json": "*"
+    "ext-json": "*",
+    "splitbrain/php-archive": "^1.1"
   },
   "require-dev": {
     "ergebnis/phpstan-rules": "^0.15.0",
@@ -39,6 +40,9 @@
     "thecodingmachine/phpstan-strict-rules": "^0.12.0",
     "vlucas/phpdotenv": "^4.0"
   },
+  "suggest": {
+    "vlucas/phpdotenv": "^4.0"
+  },
   "config": {
     "sort-packages": true,
     "preferred-install": "dist"
@@ -48,7 +52,7 @@
     "test:lint": "php-cs-fixer fix -v --dry-run",
     "test:rector": "rector process src --dry-run",
     "test:types": "phpstan analyse --ansi --memory-limit=0",
-    "test:unit": "./vendor/bin/phpunit",
+    "test:unit": "phpunit",
     "test": [
       "@test:lint",
       "@test:types",
