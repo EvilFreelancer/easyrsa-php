@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace EasyRSA;
 
-use EasyRSA\Interfaces\ConfigInterface;
 use EasyRSA\Interfaces\DownloaderInterface;
-use RuntimeException;
+use splitbrain\PHPArchive\Tar;
 
-class Downloader implements DownloaderInterface
+class Downloader extends Worker implements DownloaderInterface
 {
     /**
      * Url via which possible to get the latest release of EasyRSA.
@@ -16,24 +15,7 @@ class Downloader implements DownloaderInterface
     public const URL_LATEST_RELEASE = 'https://api.github.com/repos/OpenVPN/easy-rsa/releases/latest';
 
     /**
-     * @var \EasyRSA\Interfaces\ConfigInterface
-     */
-    private ConfigInterface $config;
-
-    /**
-     * Downloader constructor, need configuration for normal usage.
-     *
-     * @param \EasyRSA\Interfaces\ConfigInterface $config
-     */
-    public function __construct(ConfigInterface $config)
-    {
-        $this->config = $config;
-    }
-
-    /**
      * Exec some operation by cURL.
-     *
-     * TODO: Rewrite to Guzzle
      *
      * @param string      $url
      * @param string|null $filename
@@ -89,25 +71,26 @@ class Downloader implements DownloaderInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws \splitbrain\PHPArchive\ArchiveIllegalCompressionException If archive is broken
+     * @throws \splitbrain\PHPArchive\ArchiveIOException If not possible to read archive
+     * @throws \splitbrain\PHPArchive\ArchiveCorruptedException If archive corrupted
      */
     public function extractArchive(): array
     {
-        $scripts = $this->config->getScripts();
-        $archive = $this->config->getArchive();
-        $result  = [];
+        $tar = new Tar();
+        $tar->open($this->config->get('archive'));
+        $tar->extract($this->config->get('scripts'), 1);
 
-        // Extract only if folder exist
-        if (mkdir($scripts, 0755, true) || is_dir($scripts)) {
-            exec("/usr/bin/env tar xfvz $archive -C $scripts --strip-components=1", $result);
-        } else {
-            throw new RuntimeException("Folder $scripts can't be created");
-        }
-
-        return $result;
+        return $tar->contents();
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws \splitbrain\PHPArchive\ArchiveIllegalCompressionException If archive is broken
+     * @throws \splitbrain\PHPArchive\ArchiveIOException If not possible to read archive
+     * @throws \splitbrain\PHPArchive\ArchiveCorruptedException If archive corrupted
      */
     public function getEasyRSA(): void
     {
