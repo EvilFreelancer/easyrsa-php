@@ -1,7 +1,7 @@
 {
   "name": "evilfreelancer/easyrsa-php",
   "type": "library",
-  "description": "Wrapper on PHP for EasyRSA by OpenVPN team",
+  "description": "An easy way to use the official EasyRSA collection of shell scripts in your application",
   "license": "MIT",
   "autoload": {
     "psr-4": {
