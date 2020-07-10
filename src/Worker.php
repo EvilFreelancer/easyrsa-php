@@ -13,12 +13,12 @@ class Worker implements WorkerInterface
     /**
      * @var \EasyRSA\Interfaces\ConfigInterface
      */
-    protected ConfigInterface $config;
+    protected $config;
 
     /**
      * If need to enable debug mode
      */
-    public bool $dryRun = false;
+    public $dryRun = false;
 
     /**
      * Wrapper constructor, need configuration for normal usage
@@ -94,7 +94,6 @@ class Worker implements WorkerInterface
         if ($this->dryRun) {
             $result = [$command];
         } else {
-
             // Create folder if not exist
             if (
                 !file_exists($this->config->get('certs'))

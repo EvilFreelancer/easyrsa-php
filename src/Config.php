@@ -16,17 +16,17 @@ class Config implements ConfigInterface
     /**
      * Path to archive with EasyRSA scripts
      */
-    public string $archive = '.' . DIRECTORY_SEPARATOR . 'easy-rsa.tar.gz';
+    public $archive = './easy-rsa.tar.gz';
 
     /**
      * Path to folder with EasyRSA scripts
      */
-    public string $scripts = '.' . DIRECTORY_SEPARATOR . 'easy-rsa';
+    public $scripts = './easy-rsa';
 
     /**
      * Part to certificates store folder
      */
-    public string $certs = '.' . DIRECTORY_SEPARATOR . 'easy-rsa-certs';
+    public $certs = './easy-rsa-certs';
 
     /**
      * List of allowed variables
