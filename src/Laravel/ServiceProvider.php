@@ -29,7 +29,7 @@ class ServiceProvider extends BaseServiceProvider
     {
         $app = $this->app;
 
-        $app->singleton('easy-rsa.factory', static function ($app) {
+        $app->singleton('easy-rsa.factory', static function () {
             return new Factory();
         });
 

@@ -15,21 +15,21 @@ class Manager
      *
      * @var \Illuminate\Contracts\Container\Container
      */
-    protected Container $app;
+    protected $app;
 
     /**
      * The EasyRSA connection factory instance.
      *
      * @var \EasyRSA\Laravel\Factory
      */
-    protected Factory $factory;
+    protected $factory;
 
     /**
      * The active worker instances.
      *
      * @var array
      */
-    protected array $workers = [];
+    protected $workers = [];
 
     /**
      * @param \Illuminate\Contracts\Container\Container $app
