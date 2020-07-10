@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests;
+namespace Tests\EasyRSA;
 
 use EasyRSA\Config;
 use EasyRSA\Interfaces\ConfigInterface;
