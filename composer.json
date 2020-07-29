@@ -28,7 +28,6 @@
     "splitbrain/php-archive": "^1.1"
   },
   "require-dev": {
-    "ergebnis/phpstan-rules": "^0.15.0",
     "friendsofphp/php-cs-fixer": "^2.16",
     "larapack/dd": "^1.1",
     "limedeck/phpunit-detailed-printer": "^5.0",
