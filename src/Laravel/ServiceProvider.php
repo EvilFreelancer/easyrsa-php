@@ -46,7 +46,7 @@ class ServiceProvider extends BaseServiceProvider
 
     protected function setUpConfig(): void
     {
-        $source = dirname(dirname(__DIR__)) . '/config/easy-rsa.php';
+        $source = __DIR__ . '/../../config/easy-rsa.php';
 
         if ($this->app instanceof LaravelApplication) {
             $this->publishes([$source => config_path('easy-rsa.php')], 'config');
