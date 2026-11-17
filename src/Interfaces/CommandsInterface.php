@@ -30,34 +30,38 @@ interface CommandsInterface
     public function genReq(string $name, bool $nopass = false): array;
 
     /**
-     * @param string $filename
+     * @param string      $filename
+     * @param string|null $passin
      *
      * @return array<string>
      */
-    public function signReqServer(string $filename): array;
+    public function signReqServer(string $filename, ?string $passin = null): array;
 
     /**
-     * @param string $filename
+     * @param string      $filename
+     * @param string|null $passin
      *
      * @return array<string>
      */
-    public function signReqClient(string $filename): array;
+    public function signReqClient(string $filename, ?string $passin = null): array;
 
     /**
-     * @param string $name
-     * @param bool   $nopass
+     * @param string      $name
+     * @param bool        $nopass
+     * @param string|null $passin
      *
      * @return array<string>
      */
-    public function buildClientFull(string $name, bool $nopass = false): array;
+    public function buildClientFull(string $name, bool $nopass = false, ?string $passin = null): array;
 
     /**
-     * @param string $name
-     * @param bool   $nopass
+     * @param string      $name
+     * @param bool        $nopass
+     * @param string|null $passin
      *
      * @return array<string>
      */
-    public function buildServerFull(string $name, bool $nopass = false): array;
+    public function buildServerFull(string $name, bool $nopass = false, ?string $passin = null): array;
 
     /**
      * @param string $filename
