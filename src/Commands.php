@@ -14,6 +14,31 @@ class Commands extends Worker implements CommandsInterface
     protected const NOPASS = 'nopass';
 
     /**
+     * Build the global "--passin" option for the easyrsa command.
+     *
+     * EasyRSA 3.0.6+ accepts OpenSSL password sources such as "env:VAR" or
+     * "file:/path/to/file". Prefer these indirections over the raw "pass:..."
+     * form: a literal password would appear in the process arguments (ps output).
+     *
+     * Global options MUST be placed before the command name, so the returned
+     * string is meant to be prefixed to the command.
+     *
+     * @see https://github.com/OpenVPN/easy-rsa/blob/master/README.quickstart.md
+     *
+     * @param string|null $passin OpenSSL password source (eg: "env:CA_PASS" or "file:/run/secrets/ca.pass")
+     *
+     * @return string Ready-to-use option with trailing space, empty string when not set
+     */
+    protected function passinOption(?string $passin): string
+    {
+        if (null === $passin || '' === $passin) {
+            return '';
+        }
+
+        return '--passin=' . escapeshellarg($passin) . ' ';
+    }
+
+    /**
      * Instantiate Public Key Infrastructure (PKI)
      *
      * @return array<string>
@@ -65,55 +90,67 @@ class Commands extends Worker implements CommandsInterface
     /**
      * Sign request for client certificate
      *
-     * @param string $filename
+     * @param string      $filename
+     * @param string|null $passin   OpenSSL password source for the CA key
+     *                              (eg: "env:CA_PASS" or "file:/run/secrets/ca.pass"),
+     *                              requires EasyRSA 3.0.6+
      *
      * @return array<string>
      */
-    public function signReqClient(string $filename): array
+    public function signReqClient(string $filename, ?string $passin = null): array
     {
-        return $this->exec("sign-req client $filename");
+        return $this->exec($this->passinOption($passin) . 'sign-req client ' . escapeshellarg($filename));
     }
 
     /**
      * Sign request for server certificate
      *
-     * @param string $filename
+     * @param string      $filename
+     * @param string|null $passin   OpenSSL password source for the CA key
+     *                              (eg: "env:CA_PASS" or "file:/run/secrets/ca.pass"),
+     *                              requires EasyRSA 3.0.6+
      *
      * @return array<string>
      */
-    public function signReqServer(string $filename): array
+    public function signReqServer(string $filename, ?string $passin = null): array
     {
-        return $this->exec("sign-req server $filename");
+        return $this->exec($this->passinOption($passin) . 'sign-req server ' . escapeshellarg($filename));
     }
 
     /**
      * Build public and private key of client
      *
-     * @param string $name
-     * @param bool   $nopass
+     * @param string      $name
+     * @param bool        $nopass
+     * @param string|null $passin   OpenSSL password source for the CA key
+     *                              (eg: "env:CA_PASS" or "file:/run/secrets/ca.pass"),
+     *                              requires EasyRSA 3.0.6+
      *
      * @return array<string>
      */
-    public function buildClientFull(string $name, bool $nopass = false): array
+    public function buildClientFull(string $name, bool $nopass = false, ?string $passin = null): array
     {
-        $param = $nopass ? self::NOPASS : '';
+        $param = $nopass ? ' ' . self::NOPASS : '';
 
-        return $this->exec("build-client-full $name $param");
+        return $this->exec($this->passinOption($passin) . 'build-client-full ' . escapeshellarg($name) . $param);
     }
 
     /**
-     * Build public and private key of client
+     * Build public and private key of server
      *
-     * @param string $name
-     * @param bool   $nopass
+     * @param string      $name
+     * @param bool        $nopass
+     * @param string|null $passin   OpenSSL password source for the CA key
+     *                              (eg: "env:CA_PASS" or "file:/run/secrets/ca.pass"),
+     *                              requires EasyRSA 3.0.6+
      *
      * @return array<string>
      */
-    public function buildServerFull(string $name, bool $nopass = false): array
+    public function buildServerFull(string $name, bool $nopass = false, ?string $passin = null): array
     {
-        $param = $nopass ? self::NOPASS : '';
+        $param = $nopass ? ' ' . self::NOPASS : '';
 
-        return $this->exec("build-server-full $name $param");
+        return $this->exec($this->passinOption($passin) . 'build-server-full ' . escapeshellarg($name) . $param);
     }
 
     /**

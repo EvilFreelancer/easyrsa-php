@@ -43,18 +43,17 @@ Result of this script will be in `easy-rsa` folder.
 ```php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use Dotenv\Dotenv;
 use EasyRSA\Commands;
-
-// Load dotenv?
-if (file_exists(__DIR__ . '/../vars.example')) {
-    Dotenv::createImmutable(__DIR__ . '/../', 'vars.example')->load();
-}
 
 $cmd = new Commands([
     'scripts' => './easy-rsa',
     'certs'   => './easy-rsa-certs',
 ]);
+
+// Load EASYRSA_* variables from a vars file into the subprocess environment
+if (file_exists(__DIR__ . '/../vars.example')) {
+    $cmd->loadVars(__DIR__ . '/../vars.example');
+}
 
 $cmd->initPKI();
 $cmd->buildCA(true);
@@ -66,6 +65,59 @@ $cmd->buildClientFull('client2', true);
 
 Result of this script will be in `easy-rsa-certs` folder.
 
+> Note: `Dotenv::createImmutable(...)->load()` alone is not enough. Dotenv puts
+> loaded values only into `$_ENV`/`$_SERVER` and does not export them to child
+> processes, so the spawned `easyrsa` script does not see them. The worker
+> exports `EASYRSA_*` variables before each command (values found in `$_ENV`
+> are synced too), but `loadVars()` or `setEnv()` is the reliable way.
+
+### Password-protected CA (--passin)
+
+Since EasyRSA 3.0.6 the `easyrsa` script supports the global `--passin` option,
+which passes an OpenSSL password source instead of asking for the CA key
+password interactively. Methods `buildClientFull()`, `buildServerFull()`,
+`signReqClient()` and `signReqServer()` accept it as an optional last argument:
+
+```php
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use EasyRSA\Commands;
+
+$cmd = new Commands([
+    'scripts' => './easy-rsa',
+    'certs'   => './easy-rsa-certs',
+]);
+
+// Password source is an OpenSSL password argument, prefer indirections:
+//   "env:CA_PASS"                 - password from the CA_PASS environment variable
+//   "file:/run/secrets/ca.pass"   - password from a file
+// Avoid the raw "pass:secret" form: it would be visible in the process list.
+
+putenv('CA_PASS=super-secret');
+
+$cmd->buildClientFull('client1', false, 'env:CA_PASS');
+$cmd->buildServerFull('server', false, 'file:/run/secrets/ca.pass');
+$cmd->signReqClient('some.req', 'env:CA_PASS');
+```
+
+Generated command looks like this (global options are placed before the
+command, as required by the easyrsa script):
+
+```
+./easy-rsa/easyrsa3/easyrsa --batch --passin='env:CA_PASS' build-client-full 'client1'
+```
+
+For a password-protected CA built with `buildCA()` you need to provide both
+password sources on the environment before the command runs, otherwise
+EasyRSA asks for the passphrase interactively and fails in batch mode:
+
+```php
+putenv('EASYRSA_PASSIN=file:/run/secrets/ca.pass');
+putenv('EASYRSA_PASSOUT=file:/run/secrets/ca.pass');
+
+$cmd->buildCA();
+```
+
 ### List of all available commands
 
 | Method                                              | Description |
@@ -75,10 +127,10 @@ Result of this script will be in `easy-rsa-certs` folder.
 | buildCA(bool $nopass = false)                       | Build Certificate Authority (CA) |
 | genDH()                                             | Generate Diffie-Hellman certificate (DH) |
 | genReq()                                            | Generate request for certificate |
-| signReqClient(string $filename)                     | Sign request for client certificate |
-| signReqServer(string $filename)                     | Sign request for server certificate |
-| buildClientFull(string $name, bool $nopass = false) | Build public and private key of client |
-| buildServerFull(string $name, bool $nopass = false) | Build public and private key of server |
+| signReqClient(string $filename, ?string $passin = null)                     | Sign request for client certificate |
+| signReqServer(string $filename, ?string $passin = null)                     | Sign request for server certificate |
+| buildClientFull(string $name, bool $nopass = false, ?string $passin = null) | Build public and private key of client |
+| buildServerFull(string $name, bool $nopass = false, ?string $passin = null) | Build public and private key of server |
 | revoke(string $filename)                            | Revoke certificate |
 | genCRL()                                            | Generate Certificate Revocation List (CRL) |
 | updateDB()                                          | Update certificates database |

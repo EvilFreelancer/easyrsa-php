@@ -2,18 +2,19 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use Dotenv\Dotenv;
 use EasyRSA\Commands;
-
-// Load dotenv?
-if (file_exists(__DIR__ . '/../vars.example')) {
-    Dotenv::createImmutable(__DIR__ . '/../', 'vars.example')->load();
-}
 
 $cmd = new Commands([
     'scripts' => './easy-rsa',
     'certs'   => './easy-rsa-certs',
 ]);
+
+// Load EASYRSA_* variables from a vars file into the subprocess environment.
+// Dotenv::load() alone is not enough: it does not export values to child
+// processes, so the spawned easyrsa script would not see them.
+if (file_exists(__DIR__ . '/../vars.example')) {
+    $cmd->loadVars(__DIR__ . '/../vars.example');
+}
 
 $cmd->initPKI();
 $cmd->buildCA(true);
